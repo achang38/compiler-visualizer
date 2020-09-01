@@ -1,0 +1,104 @@
+int acre;
+int b;
+
+int mshift(int a, int b, int c, bool d) {
+	acre = 49;
+	if(b>a-(-10)) {
+		return 9000;
+	} else {
+	return 2*a-3*b+c/5;
+	}
+}
+
+void main(int red,bool blue){
+	int f;
+	int g;
+	int h;
+	bool ar;
+	bool ac;
+	bool ad;
+	int input;
+	ar = 20*8<=160;
+	f = 9/3;
+	ac = f*4>12;
+	ad = f+5<9;
+
+	if(!ac) {
+		int a;
+		int b;
+		int c;
+		int d;
+		d = 345;
+		cout << d;
+		cout << "\n";
+		if(false) {
+			int a;
+			int b;
+			int c;
+			int d;
+			cout << "Mistake\n";
+		} else {
+			int a;
+			int b;
+			int c;
+			int d;
+			a = 1;
+			cout << "Working\n";
+			while(a<f+7) {
+				
+				bool b;
+				int counter;
+				counter++;
+				a = counter;
+				cout << a;
+				cout << "th loop\n";
+			}
+		}
+	}
+
+	if(!(ac || ar)) {
+		cout << "Mistake\n";
+	}
+
+	if(true||ad) {
+		cout << f+90;
+		cout << "\n";
+	} else {
+		cout << "Mistake\n";
+	}
+	f  = 3;
+	f = 4+f;
+	f++;
+	g = 0;
+	g = f*2-12/2;
+	h = (f*g-20)/2-2;
+	h = -h;
+	cin >> input;
+	cout << input/5;
+	cout << "\n";
+	cout << -6-(-4);
+	cout << "\n";
+	cout << -4+2;
+	cout << "\n";
+	cout << -20/(-10);
+	cout << "\n";
+	cout << "Hello"=="Hello";
+	cout << "\n";
+	cout << "Hello"=="hello";
+	cout << "\n";
+	cout << "Hello"=="Helloo";
+	cout << "\n";
+	cout << ar;
+	cout << ac;
+	cout << ad;
+	cout << !ad && ad;
+	cout << ar && true;
+	cout << !ar || ac;
+	cout << "\n";
+	cout << mshift(h/7,f-3,g*2,true);
+	cout << "\n";
+	cout << acre;
+	cout << "\n";
+}
+
+int horn;
