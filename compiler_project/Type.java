@@ -201,6 +201,10 @@ class StructDefType extends Type {
     }
 }
 
+
+// **********************************************************************
+// ScopeType - just for the purposes of describin current scope
+// **********************************************************************
 class ScopeType extends Type {
     public boolean equals(Type t) {
         return false;
