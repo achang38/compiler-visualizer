@@ -2610,6 +2610,10 @@ class IntLitNode extends ExpNode {
         Codegen.genPush("$t0");
     }
 
+    public SymTable analyze(SymTable symT) {
+        return symT;
+    }
+
     /**
      * Return the line number for this literal.
      */
@@ -2651,6 +2655,10 @@ class StringLitNode extends ExpNode {
         String val = "\""+myStrVal+"\"";
         tree.addChild(parent,new TextInBox(val,20,20));
         return;
+    }
+
+    public SymTable analyze(SymTable symT) {
+        return symT;
     }
     
     public void codeGen(PrintWriter p) {
@@ -2707,6 +2715,10 @@ class TrueNode extends ExpNode {
         return;
     }
 
+    public SymTable analyze(SymTable symT) {
+        return symT;
+    }
+
     public void codeGen(PrintWriter p) {
         Codegen.generate("li","$t0",1);
         Codegen.genPush("$t0");
@@ -2750,6 +2762,10 @@ class FalseNode extends ExpNode {
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         tree.addChild(parent,new TextInBox("FALSE",20,20));
         return;
+    }
+
+    public SymTable analyze(SymTable symT) {
+        return symT;
     }
 
     public void codeGen(PrintWriter p) {
@@ -2798,6 +2814,20 @@ class IdNode extends ExpNode {
         return;
     }
 
+    public SymTable analyze(SymTable symT) {
+        try {
+            if(symT.lookupGlobal(myStrVal) == null) {
+                ErrMsg.fatal(myLineNum,myCharNum,"Undeclared identifier");
+            } else {
+                link = symT.lookupGlobal(myStrVal);
+            }
+        } catch (EmptySymTableException ee) {
+            System.err.println("Unexpected EmptySymTableException in IdNode.analyze");
+            System.exit(-1);
+        }
+        return symT;
+    }
+
     public void codeGen(PrintWriter p) {
         if(mySym.getOffset() == 0) {
             Codegen.generate("lw","$t0","_"+myStrVal);
@@ -2806,6 +2836,7 @@ class IdNode extends ExpNode {
         }
         Codegen.genPush("$t0");
     }
+
 
     public void genAddr(PrintWriter p) {
         if(mySym.getOffset() == 0) {
@@ -2899,6 +2930,18 @@ class IdNode extends ExpNode {
             p.print("(" + mySym + "("+mySym.getOffset()+"))");
         }
     }
+
+    public String toString() {
+	    return myStrVal;
+    }
+    
+    public int getCharNum() {
+        return myCharNum;
+    }
+    
+    public int getLineNum() {
+        return myLineNum;
+    }
     
     public String getOffset() {
         return "("+mySym.getOffset()+")";
@@ -2948,6 +2991,94 @@ class DotAccessExpNode extends ExpNode {
     public int charNum() {
         return myId.charNum();
     }
+
+    public SymTable analyze(SymTable symT) {
+      
+        try {
+            if(myLoc instanceof DotAccessExpNode) {
+               
+                symT = myLoc.analyze(symT);
+                if(((DotAccessExpNode)myLoc).hasError()) {
+                    hasError = true;
+                   
+                } else {
+                  
+                  Sym s = this.getTable(symT).lookupGlobal(myId.toString());
+                  if(s == null) {
+                    
+                    SymTable previous = ((DotAccessExpNode)myLoc).getTable(symT);
+                    Sym check = previous.lookupGlobal(((DotAccessExpNode)myLoc).getId().toString());
+                    if(!check.getKind().equals("struct variable")) {
+                        ErrMsg.fatal(((DotAccessExpNode)myLoc).getId().getLineNum(),((DotAccessExpNode)myLoc).getId().getCharNum(),"Dot-access of non-struct type");
+                    } else {
+                        ErrMsg.fatal(myId.getLineNum(),myId.getCharNum(),"Invalid struct field name");
+                    }
+                    hasError = true;
+                  } 
+                    
+                    
+                    else {
+            
+                      SymTable analyzeT = this.getTable(symT);
+                      analyzeT = myId.analyze(analyzeT);
+                    }
+                }
+            }
+            if(myLoc instanceof IdNode) {
+                
+                Sym s = symT.lookupGlobal(((IdNode)myLoc).toString());
+                if(s == null) {
+                    
+                    symT = myLoc.analyze(symT);
+                    ErrMsg.fatal(((IdNode)myLoc).getLineNum(),((IdNode)myLoc).getCharNum(),"Dot-access of non-struct type");
+                    hasError = true;
+                    
+                } else if(!s.getKind().equals("struct variable")) {
+                    
+                    ErrMsg.fatal(((IdNode)myLoc).getLineNum(),((IdNode)myLoc).getCharNum(),"Dot-access of non-struct type");
+                    hasError = true;
+                } else {
+                    SymTable structT = s.getTable();
+                    if(structT.lookupGlobal(myId.toString()) == null) {
+                        ErrMsg.fatal(myId.getLineNum(),myId.getCharNum(),"Invalid struct field name");
+                        hasError = true;
+                    } else {
+                        
+                        symT = myLoc.analyze(symT);
+                        SymTable analyzeT = this.getTable(symT); //symT = myId.analyze(symT);
+                        analyzeT = myId.analyze(analyzeT);
+                    }
+                }
+            }
+        } catch (EmptySymTableException ee) {
+            System.err.println("Unexpected EmptySymTableException in DotAccessExpNode.analyze");
+            System.exit(-1);
+        }
+        return symT;
+    }
+
+    public SymTable getTable(SymTable symT) {
+        SymTable sol = new SymTable();
+        try {
+          if(myLoc instanceof DotAccessExpNode) {
+            SymTable structT = ((DotAccessExpNode)myLoc).getTable(symT);
+            Sym s = structT.lookupGlobal(((DotAccessExpNode)myLoc).getId().toString());
+          
+            sol = s.getTable();
+            
+          } else {
+            Sym s = symT.lookupGlobal(((IdNode)myLoc).toString());
+         
+            sol =  s.getTable();
+          }
+        } catch(EmptySymTableException ee) {
+            System.err.println("Unexpected EmptySymTableException in DotAccessExpNode.getTable");
+        }
+        return sol;
+      
+    }
+
+
 
     /**
      * nameAnalysis
@@ -3063,11 +3194,21 @@ class DotAccessExpNode extends ExpNode {
         myId.unparse(p, 0);
     }
 
+    public IdNode getId() {
+        return myId;
+        
+    }
+    
+    public boolean hasError() {
+        return hasError;
+    }
+
     // 2 kids
     private ExpNode myLoc;
     private IdNode myId;
     private Sym mySym;          // link to Sym for struct type
     private boolean badAccess;  // to prevent multiple, cascading errors
+    private boolean hasError;
 }
 
 class AssignNode extends ExpNode {
@@ -3114,6 +3255,12 @@ class AssignNode extends ExpNode {
      */
     public int charNum() {
         return myLhs.charNum();
+    }
+
+    public SymTable analyze(SymTable symT) {
+        symT = myLhs.analyze(symT);
+        symT = myExp.analyze(symT);
+        return symT;
     }
 
     /**
@@ -3221,6 +3368,12 @@ class CallExpNode extends ExpNode {
         return myId.charNum();
     }
 
+    public SymTable analyze(SymTable symT) {
+        symT = myId.analyze(symT);
+        symT = myExpList.analyze(symT);
+        return symT;
+    }
+
     /**
      * nameAnalysis
      * Given a symbol table symTab, perform name analysis on this node's
@@ -3297,6 +3450,11 @@ abstract class UnaryExpNode extends ExpNode {
         return myExp.charNum();
     }
 
+    public SymTable analyze(SymTable symT) {
+        symT = myExp.analyze(symT);
+        return symT;
+    }
+
     /**
      * nameAnalysis
      * Given a symbol table symTab, perform name analysis on this node's child
@@ -3330,6 +3488,12 @@ abstract class BinaryExpNode extends ExpNode {
      */
     public int charNum() {
         return myExp1.charNum();
+    }
+
+    public SymTable analyze(SymTable symT) {
+        symT = myExp1.analyze(symT);
+        symT = myExp2.analyze(symT);
+        return symT;
     }
 
     /**
