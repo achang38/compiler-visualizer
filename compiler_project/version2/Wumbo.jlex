@@ -1,4 +1,5 @@
 import java_cup.runtime.*; // defines the Symbol class
+import project.*;
 
 // The generated scanner will return a Symbol for each token that it finds.
 // A Symbol contains an Object field named value; that field will be of type
@@ -143,6 +144,12 @@ return {
         CharNum.num += yytext().length();
         return s;
 }
+
+repeat {
+	Symbol s = new Symbol(sym.REPEAT, new TokenVal(yyline+1,CharNum.num));
+	CharNum.num += yytext().length();
+	return s;
+	}
 
 ({LETTER}|_)({LETTER}|{DIGIT}|_)* {
 	String val = yytext();
@@ -333,7 +340,7 @@ return {
         return s;
 }
 
-([/][/][/]|[#][#]).*	{}        
+("//"|"#")[^\n]*	{}        
 
 [\"](\\[nt\?\"\'\\]|([^\\\"\n]))*\\[^nt\?\"\'\\\n](\"\\|[^\n\"])*[\"]	{
 	ErrMsg.fatal(yyline+1, CharNum.num, "string literal with bad escaped character ignored");

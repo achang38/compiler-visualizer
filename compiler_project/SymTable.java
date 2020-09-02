@@ -8,6 +8,8 @@ public class SymTable {
   public SymTable() {
     list = new LinkedList<HashMap<String, Sym>>();
     list.add(new HashMap<String, Sym>());
+
+    garbage = new LinkedList<HashMap<String, Sym>>();
   }
 
   public void addDecl(String name, Sym sym) throws DuplicateSymException,

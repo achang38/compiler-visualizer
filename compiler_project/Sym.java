@@ -8,8 +8,19 @@ public class Sym {
     private Type type;
     private int offset;
 
+    private String type2;
+    private String kind;
+    private SymTable table;
+    private boolean dummy;
+    private String funcstring;
+
     public Sym(Type type) {
         this.type = type;
+    }
+
+    public Sym(String type) {
+        this.type2 = type;
+        this.table = new SymTable();
     }
 
     public Type getType() {
@@ -24,9 +35,46 @@ public class Sym {
         return this.offset;
     }
 
+    public void setKind(String kind) {
+        this.kind = kind;
+    }
+    
+    public String getKind() {
+        return kind;
+    }
+
+    
     public String toString() {
         return type.toString();
     }
+    
+
+    public void setTable(SymTable symT) {
+	    this.table = symT;
+    }
+    
+    public SymTable getTable() {
+      return this.table;
+    }
+
+    public String getType2() {
+        return this.type2;
+    }
+    
+    public void setFunc(String s) {
+        this.funcstring = s;
+    }
+    
+    public String getFunc() {
+        return funcstring;
+    }
+    
+    public String toString2() {
+        return this.type2;
+    }
+
+
+
 }
 
 /**

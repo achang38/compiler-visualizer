@@ -957,7 +957,7 @@ class VarDeclNode extends DeclNode {
         myType.unparse(p, 0);
         p.print(" ");
         p.print(myId.name());
-        p.print(myId.getOffset());
+        //p.print(myId.getOffset());
         p.println(";");
     }
 
@@ -1312,7 +1312,7 @@ class FormalDeclNode extends DeclNode {
         myType.unparse(p, 0);
         p.print(" ");
         p.print(myId.name());
-        p.print(myId.getOffset());
+        //p.print(myId.getOffset());
     }
 
     // 2 kids
@@ -1561,6 +1561,11 @@ class StructNode extends TypeNode {
     public IdNode idNode() {
         return myId;
     }
+
+    public IdNode getIdNode() {
+        return myId;
+    }
+
 
     /**
      * type
@@ -2927,7 +2932,7 @@ class IdNode extends ExpNode {
     public void unparse(PrintWriter p, int indent) {
         p.print(myStrVal);
         if (mySym != null) {
-            p.print("(" + mySym + "("+mySym.getOffset()+"))");
+            //p.print("(" + mySym + "("+mySym.getOffset()+"))");
         }
     }
 
@@ -2951,6 +2956,7 @@ class IdNode extends ExpNode {
     private int myCharNum;
     private String myStrVal;
     private Sym mySym;
+    private Sym link;
 }
 
 class DotAccessExpNode extends ExpNode {

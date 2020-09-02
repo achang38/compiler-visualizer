@@ -1,7 +1,7 @@
 /**********************************************************************
  Java CUP specification for a parser for Wumbo programs.
  **********************************************************************/
-
+import project.*;
 import java_cup.runtime.*;
 import java.util.*;
 
