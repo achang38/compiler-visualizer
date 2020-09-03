@@ -45,7 +45,12 @@ public class Sym {
 
     
     public String toString() {
-        return type.toString();
+        
+        if(type != null) {
+            return type.toString();
+        }
+
+        return this.type2;
     }
     
 

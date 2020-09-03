@@ -4,6 +4,10 @@ public class SymTable {
 
   private List<HashMap<String, Sym>> list;
   private List<HashMap<String, Sym>> garbage;
+  public int ifcount = 1;
+  public int elsecount = 1;
+  public int whilecount = 1;
+  public int repeatcount = 1;
 
   public SymTable() {
     list = new LinkedList<HashMap<String, Sym>>();
@@ -78,6 +82,10 @@ public class SymTable {
 
   public List<HashMap<String, Sym>> getGarbage() {
     return garbage;
+  }
+
+  public void addGarbage(SymTable st) {
+    this.garbage.add(st.getList().get(0));
   }
 
   public void print() {

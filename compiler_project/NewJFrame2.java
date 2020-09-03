@@ -9,6 +9,7 @@ import java.awt.Container;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JTable;
 
 import org.abego.treelayout.TreeForTreeLayout;
 import org.abego.treelayout.TreeLayout;
@@ -245,7 +246,63 @@ public class NewJFrame2 extends javax.swing.JFrame {
 
 		// Create a panel that draws the nodes and edges and show the panel
 		panel = new TextInBoxTreePane(treeLayout);
-        jScrollPane3.setViewportView(panel);
+        //jScrollPane3.setViewportView(panel);
+
+        ////////////////////////////NAME ANALYSIS//////////////////////////////////
+        SymTable symT = astRoot.analyze();
+        List<HashMap<String, Sym>> list = symT.getList();
+        List<HashMap<String, Sym>> garbage = symT.getGarbage();
+        String[] columnNames = {"ID","Type","Category","Scope"};
+        ArrayList<String[]> tData = new ArrayList<String[]>();
+
+        System.out.print("\nSym Table\n");
+        for (HashMap<String, Sym> symTab : list) {
+            for(Map.Entry m : symTab.entrySet()) {
+                String[] entry = new String[4];
+                entry[0] = (String)m.getKey();
+                entry[1] = ((Sym)m.getValue()).getType2();
+                entry[2] = ((Sym)m.getValue()).getKind();
+                entry[3] = "global";
+
+                tData.add(entry);
+
+            }
+            
+        }
+
+        for (HashMap<String, Sym> symTab : garbage) {
+            String scope = "null";
+            if(symTab.containsKey("$scope")) {
+                scope = symTab.get("$scope").toString();
+                symTab.remove("$scope");
+
+                for(Map.Entry m : symTab.entrySet()) {
+                    String[] entry = new String[4];
+                    entry[0] = (String)m.getKey();
+                    entry[1] = ((Sym)m.getValue()).getType2();
+                    entry[2] = ((Sym)m.getValue()).getKind();
+                    entry[3] = scope;
+    
+                    tData.add(entry);
+    
+                }
+            }
+
+            
+        }
+
+        
+
+        String[][] data = new String[tData.size()][3];
+
+        for(int i = 0; i<tData.size();i++) {
+            data[i] = tData.get(i);
+        }
+
+        JTable jT = new JTable(data,columnNames);
+        jScrollPane3.setViewportView(jT);
+
+
     }
     
     /**

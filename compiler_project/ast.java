@@ -1047,13 +1047,15 @@ class FnDeclNode extends DeclNode {
 	      s.setKind("function");
         symT.addScope();
 	      String param = myFormalsList.toString(symT);
-	      symT.removeScope();
+	    symT.removeScope();
         s.setFunc(param);
         
 	      symT.addDecl(myId.toString(),s);
-	      symT.addScope();
+          symT.addScope();
+          
 	      symT = myFormalsList.analyze(symT);
-	      symT = myBody.analyze(symT);
+          symT = myBody.analyze(symT);
+          symT.addDecl("$scope",new Sym(myId.toString()));
 	      symT.removeScope();
 	    } catch(IllegalArgumentException ie) {
 	      System.err.println("Unexpected IllegalArgumentException in FnDeclNode.analyze");
@@ -1062,17 +1064,22 @@ class FnDeclNode extends DeclNode {
         ErrMsg.fatal(myId.getLineNum(),myId.getCharNum(),"Multiply declared identifier");
         try {
           symT.addScope();
+            
 	        symT = myFormalsList.analyze(symT);
-	        symT = myBody.analyze(symT);
+            symT = myBody.analyze(symT);
+            symT.addDecl("$scope",new Sym(myId.toString()));
 	        symT.removeScope();
         } catch(EmptySymTableException ee) {
           System.err.println("Unexpected EmptySymTableException in FnDeclNode.analyze");
           System.exit(-1);
+        } catch(DuplicateSymException de2) {
+            System.err.println("Unexpeced exception in FnDeclNode.analyze");
         }
 	    } catch(EmptySymTableException ee) {
 	      System.err.println("Unexpected EmptySymTableException in FnDeclNode.analyze");
 	      System.exit(-1);
-	    }
+	    } 
+    
 	  return symT;
     }
 
@@ -1135,8 +1142,8 @@ class FnDeclNode extends DeclNode {
         }
 
         myBody.nameAnalysis(symTab); // process the function body
-        //myFormalsList.computeOffsets(symTab);
-        //myId.sym().setOffset(myBody.computeOffsets(symTab));
+        myFormalsList.computeOffsets(symTab);
+        myId.sym().setOffset(myBody.computeOffsets(symTab));
 
         try {
             symTab.removeScope();  // exit scope
@@ -1362,6 +1369,8 @@ class StructDeclNode extends DeclNode {
           s.setKind("struct");
           symT.addScope();
           SymTable structT = myDeclList.createTable(symT);
+          structT.addDecl("$scope",new Sym(myId.toString()));
+          symT.addGarbage(structT);
           symT.removeScope();
           s.setTable(structT);
           symT.addDecl(type,s);
@@ -1369,6 +1378,8 @@ class StructDeclNode extends DeclNode {
           ErrMsg.fatal(myId.getLineNum(),myId.getCharNum(),"Multiply declared identifier");
           symT.addScope();
           SymTable structT = myDeclList.createTable(symT);
+          structT.addDecl("$scope",new Sym(myId.toString()));
+          symT.addGarbage(structT);
           symT.removeScope();
         }
         
@@ -1967,10 +1978,14 @@ class IfStmtNode extends StmtNode {
           symT.addScope();
           symT = myDeclList.analyze(symT);
           symT = myStmtList.analyze(symT);
+          symT.addDecl("$scope",new Sym("if loop-"+symT.ifcount));
+          symT.ifcount++;
           symT.removeScope();
         } catch (EmptySymTableException ee) {
           System.err.println("Unexpected EmptySymTableException in IfStmtNode.analyze");
           System.exit(-1);
+        } catch (DuplicateSymException de) {
+            System.err.println("Unexpected exception in IfStmtNode.analyze");
         }
     
         return symT;
@@ -2100,14 +2115,20 @@ class IfElseStmtNode extends StmtNode {
           symT.addScope();
           symT = myThenDeclList.analyze(symT);
           symT = myThenStmtList.analyze(symT);
+          symT.addDecl("$scope",new Sym("if loop-"+symT.ifcount));
+          symT.ifcount++;
           symT.removeScope();
           symT.addScope();
           symT = myElseDeclList.analyze(symT);
           symT = myElseStmtList.analyze(symT);
+          symT.addDecl("$scope",new Sym("else loop-"+symT.elsecount));
+          symT.elsecount++;
           symT.removeScope();
         } catch (EmptySymTableException ee) {
           System.err.println("Unexpected EmptySymTableException in IfStmtNode.analyze");
           System.exit(-1);
+        } catch (DuplicateSymException de) {
+            System.err.println("Unexpected exception in IfElseStmtNode.analyze");
         }
     
         return symT;
@@ -2272,10 +2293,14 @@ class WhileStmtNode extends StmtNode {
           symT.addScope();
           symT = myDeclList.analyze(symT);
           symT = myStmtList.analyze(symT);
+          symT.addDecl("$scope",new Sym("while loop-"+symT.whilecount));
+          symT.whilecount++;
           symT.removeScope();
         } catch (EmptySymTableException ee) {
           System.err.println("Unexpected EmptySymTableException in WhileStmtNode.analyze");
           System.exit(-1);
+        } catch (DuplicateSymException de) {
+            System.err.println("Unexpected exception in IfStmtNode.analyze");
         }
     
         return symT;
@@ -2373,10 +2398,14 @@ class RepeatStmtNode extends StmtNode {
           symT.addScope();
           symT = myDeclList.analyze(symT);
           symT = myStmtList.analyze(symT);
+          symT.addDecl("$scope",new Sym("repeat loop-"+symT.repeatcount));
+          symT.repeatcount++;
           symT.removeScope();
         } catch (EmptySymTableException ee) {
           System.err.println("Unexpected EmptySymTableException in RepeatStmtNode.analyze");
           System.exit(-1);
+        } catch (DuplicateSymException de) {
+            System.err.println("Unexpected exception in IfStmtNode.analyze");
         }
     
         return symT;
