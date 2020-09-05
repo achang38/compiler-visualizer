@@ -1,0 +1,12 @@
+	.data
+	.align 2
+_fire:	.space 4
+
+	.data
+	.align 2
+_water:	.space 4
+
+	.data
+	.align 2
+_x:	.space 4
+

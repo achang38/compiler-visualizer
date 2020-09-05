@@ -21,6 +21,7 @@ import org.abego.treelayout.demo.swing.TextInBoxTreePane;
 
 import java.util.*;
 import java.io.*;
+import java.nio.file.*;
 import java_cup.runtime.*;
 import project.*;
 
@@ -301,6 +302,30 @@ public class NewJFrame2 extends javax.swing.JFrame {
 
         JTable jT = new JTable(data,columnNames);
         jScrollPane3.setViewportView(jT);
+
+        //////////////CODEGEN///////////////////////////////////////
+        astRoot.nameAnalysis();
+        astRoot.typeCheck();
+        
+
+        try {
+            PrintWriter outFile = new PrintWriter("newcode.out");
+            Codegen.p = new PrintWriter(outFile);
+            astRoot.codeGen(Codegen.p);
+            outFile.close();
+            String fileString = new String(Files.readAllBytes(Paths.get("newcode.out")));
+        jTextArea2.setText(fileString);
+        } catch (FileNotFoundException fe) {
+            System.err.println("Unexpected error in NewJFrame2.initTree()");
+        } catch (IOException ie) {
+            System.err.println("Unexpected error in NewJFrame2.initTree()");
+        }
+
+        
+        
+        
+
+        
 
 
     }
