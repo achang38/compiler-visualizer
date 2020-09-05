@@ -55,7 +55,8 @@ public class P4 {
         }
 
 	// ADD NAME ANALYSIS PART HERE
-	((ProgramNode)root.value).nameAnalysis();
+    ((ProgramNode)root.value).nameAnalysis();
+    ((ProgramNode)root.value).typeCheck();
 
 	if(!ErrMsg.getErr()){
             ((ASTnode)root.value).unparse(outFile, 0);
