@@ -1,3 +1,4 @@
+import java.util.*;
 /**
  * ErrMsg
  *
@@ -5,6 +6,7 @@
  */
 class ErrMsg {
 	private static boolean err = false;
+	private static ArrayList<String> listErrors = new ArrayList<String>();
 
 	/**
 	 * Generates a fatal error message.
@@ -14,6 +16,7 @@ class ErrMsg {
 	 */
 	static void fatal(int lineNum, int charNum, String msg) {
 		err = true;
+		listErrors.add(lineNum + ":" + charNum + " ***ERROR*** " + msg);
 		System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + msg);
 	}
 
@@ -24,6 +27,7 @@ class ErrMsg {
 	 * @param msg associated message for warning
 	 */
 	static void warn(int lineNum, int charNum, String msg) {
+		listErrors.add(lineNum + ":" + charNum + " ***WARNING*** " + msg);
 		System.err.println(lineNum + ":" + charNum + " ***WARNING*** " + msg);
 	}
 
@@ -32,6 +36,14 @@ class ErrMsg {
 	 */
 	static boolean getErr() {
 		return err;
+	}
+
+	static ArrayList<String> getList() {
+		return listErrors;
+	}
+
+	static void clearErrors() {
+		listErrors.clear();
 	}
 
 }
