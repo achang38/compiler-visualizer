@@ -247,7 +247,7 @@ public class NewJFrame2 extends javax.swing.JFrame {
 
 		// Create a panel that draws the nodes and edges and show the panel
 		panel = new TextInBoxTreePane(treeLayout);
-        //jScrollPane3.setViewportView(panel);
+        jScrollPane3.setViewportView(panel);
 
         ////////////////////////////NAME ANALYSIS//////////////////////////////////
         SymTable symT = astRoot.analyze();
@@ -301,7 +301,7 @@ public class NewJFrame2 extends javax.swing.JFrame {
         }
 
         JTable jT = new JTable(data,columnNames);
-        jScrollPane3.setViewportView(jT);
+        //jScrollPane3.setViewportView(jT);
 
         //////////////CODEGEN///////////////////////////////////////
         astRoot.nameAnalysis();

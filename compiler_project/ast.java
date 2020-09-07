@@ -110,9 +110,6 @@ import org.abego.treelayout.demo.*;
 // **********************************************************************
 
 abstract class ASTnode {
-    TextInBox nLcurly = new TextInBox("{",20,20);
-    TextInBox nRcurly = new TextInBox("}",20,20);
-    TextInBox nSemi = new TextInBox(";",20,20);
 
     // every subclass must provide an unparse operation
     abstract public void unparse(PrintWriter p, int indent);
@@ -142,15 +139,11 @@ class ProgramNode extends ASTnode {
     }
     
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        //myDeclList.buildTree(tree,parent);
         TextInBox n1 = new TextInBox("declList", 50, 20);
-        TextInBox n2 = new TextInBox("2", 30, 20);
-        TextInBox n3 = new TextInBox("3", 30, 20);
+        
         tree.addChild(parent,n1);
-        //tree.addChild(parent,n2);
-        //tree.addChild(parent,n3);
 
-        myDeclList.buildTree(tree,n1);
+        myDeclList.buildTree(tree,n1,1);
         return;
     }
 
@@ -199,24 +192,53 @@ class DeclListNode extends ASTnode {
         myDecls = S;
     }
     
-    public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        int count = 0;
+    public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent, int nameCode) {
 
-        for (DeclNode node: myDecls) {
-            TextInBox n1 = new TextInBox("decl",30,20);
-            TextInBox n2 = new TextInBox("declList",50,20);
+        if(nameCode == 1) {
+            for (DeclNode node: myDecls) {
+                TextInBox n1 = new TextInBox("decl",30,20);
+                TextInBox n2 = new TextInBox("declList",50,20);
 
-            tree.addChild(parent,n1);
-            tree.addChild(parent,n2);
+                tree.addChild(parent,n1);
+                tree.addChild(parent,n2);
 
-            parent = n2;
+                parent = n2;
 
-            node.buildTree(tree,n1);
-            System.out.println("loop");
-            count++;
+                node.buildTree(tree,n1);
+
+            }
+
+            tree.addChild(parent,new TextInBox("E",20,20));
         }
 
-        tree.addChild(parent,new TextInBox("E",20,20));
+        if(nameCode == 2) {
+            for (DeclNode node: myDecls) {
+                TextInBox n2 = new TextInBox("vList",40,20);
+                tree.addChild(parent,n2);
+                node.buildTree(tree,parent);
+
+                parent = n2;
+
+
+            }
+
+            tree.addChild(parent,new TextInBox("E",20,20));
+        }
+
+        if(nameCode == 3) {
+            
+            
+            for(int i=0; i<myDecls.size();i++) {
+                TextInBox n2 = new TextInBox("strBody",50,20);
+                if(i != myDecls.size()-1) {
+                    tree.addChild(parent,n2);
+                }
+                myDecls.get(i).buildTree(tree,parent);
+
+                parent = n2;
+            }
+
+        }
 
         return;
     }
@@ -344,7 +366,11 @@ class FormalsListNode extends ASTnode {
             TextInBox cParent = new TextInBox("fList",40,20);
             
             for(FormalDeclNode node: myFormals) {
+                if(!oParent.equals(parent)) {
+                    tree.addChild(oParent,new TextInBox(",",10,20));
+                }
                 tree.addChild(oParent,cParent);
+                
                 TextInBox cDecl = new TextInBox("fDecl",40,20);
                 tree.addChild(cParent,cDecl);
                 node.buildTree(tree,cDecl);
@@ -449,7 +475,7 @@ class FnBodyNode extends ASTnode {
         tree.addChild(parent,nDecl);
         tree.addChild(parent,nStmt);
 
-        myDeclList.buildTree(tree,nDecl);
+        myDeclList.buildTree(tree,nDecl,2);
         myStmtList.buildTree(tree,nStmt);
 
         return;
@@ -509,7 +535,7 @@ class StmtListNode extends ASTnode {
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         for(StmtNode node: myStmts) {
-            TextInBox nStmt = new TextInBox("stmt",30,20);
+            TextInBox nStmt = new TextInBox("stmt",35,20);
             TextInBox nParent = new TextInBox("sList",40,20);
 
             tree.addChild(parent,nStmt);
@@ -595,11 +621,44 @@ class ExpListNode extends ASTnode {
             TextInBox oParent = parent;
             TextInBox cParent = new TextInBox("aList",40,20);
             
-            for(ExpNode node: myExps) {
+            for(ExpNode myExp: myExps) {
+                if(!oParent.equals(parent)) {
+                    tree.addChild(oParent,new TextInBox(",",10,20));
+                }
                 tree.addChild(oParent,cParent);
-                TextInBox cDecl = new TextInBox("exp",40,20);
-                tree.addChild(cParent,cDecl);
-                node.buildTree(tree,cDecl);
+                
+                TextInBox n1 = new TextInBox("exp",30,20);
+                tree.addChild(cParent,n1);
+
+                if(myExp instanceof IdNode) {
+                    TextInBox nT = new TextInBox("term",35,20);
+                    TextInBox nL = new TextInBox("loc",30,20);
+                    TextInBox nID = new TextInBox("id",20,20);
+                    tree.addChild(n1,nT);
+                    tree.addChild(nT,nL);
+                    tree.addChild(nL,nID);
+                    myExp.buildTree(tree,nID);
+                } else if(myExp instanceof CallExpNode) {
+                    TextInBox nT = new TextInBox("term",35,20);
+                    TextInBox nC = new TextInBox("fncall",50,20);
+                    tree.addChild(n1,nT);
+                    tree.addChild(nT,nC);
+                    myExp.buildTree(tree,nC);
+                } else if(myExp instanceof DotAccessExpNode) {
+                    TextInBox nT = new TextInBox("term",35,20);
+                    TextInBox nL = new TextInBox("loc",30,20);
+                    tree.addChild(n1,nT);
+                    tree.addChild(nT,nL);
+                    myExp.buildTree(tree,nL);
+                } else if (myExp instanceof AssignNode) {
+                    TextInBox nA = new TextInBox("aExp",30,20);
+                    tree.addChild(n1,nA);
+                    myExp.buildTree(tree,nA);
+                } else {
+                    myExp.buildTree(tree,n1);
+                }
+
+
                 oParent = cParent;
                 cParent = new TextInBox("aList",40,20);
             }
@@ -988,11 +1047,11 @@ class FnDeclNode extends DeclNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nF = new TextInBox("fnDecl",40,20);
+        TextInBox nF = new TextInBox("fnDecl",45,20);
         tree.addChild(parent,nF);
 
         TextInBox nType = new TextInBox("type",30,20);
-        TextInBox nID = new TextInBox("id",30,20);
+        TextInBox nID = new TextInBox("id",20,20);
         TextInBox nFormals = new TextInBox("formals",50,20);
         TextInBox nBody = new TextInBox("fnBody",50,20);
         tree.addChild(nF,nType);
@@ -1199,7 +1258,14 @@ class FormalDeclNode extends DeclNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
+        TextInBox nT = new TextInBox("type",30,20);
+        TextInBox nID = new TextInBox("id",20,20);
 
+        tree.addChild(parent,nT);
+        tree.addChild(parent,nID);
+
+        myType.buildTree(tree,nT);
+        myId.buildTree(tree,nID);
 
         return;
     }
@@ -1339,23 +1405,23 @@ class StructDeclNode extends DeclNode {
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox nStruct = new TextInBox("strDecl",50,20);
-        TextInBox nID = new TextInBox("id",30,20);
+        TextInBox nID = new TextInBox("id",20,20);
         TextInBox nBody = new TextInBox("strBody",50,20);
         
 
         tree.addChild(parent,nStruct);
 
-        tree.addChild(nStruct,new TextInBox("STRUCT",40,20));
+        tree.addChild(nStruct,new TextInBox("STRUCT",60,20));
         tree.addChild(nStruct,nID);
 
-        tree.addChild(nStruct,new TextInBox("LCURLY",50,20));     
+        tree.addChild(nStruct,new TextInBox("{",15,20));     
         tree.addChild(nStruct,nBody);   
-        tree.addChild(nStruct,new TextInBox("RCURLY",50,20));  
+        tree.addChild(nStruct,new TextInBox("}",15,20));  
 
-        tree.addChild(nStruct,new TextInBox(";",20,20));
+        tree.addChild(nStruct,new TextInBox(";",10,20));
         
         myId.buildTree(tree,nID);
-        myDeclList.buildTree(tree,nBody);
+        myDeclList.buildTree(tree,nBody,3);
         return;
     }
     
@@ -1514,7 +1580,7 @@ class BoolNode extends TypeNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        tree.addChild(parent,new TextInBox("BOOL",30,20));
+        tree.addChild(parent,new TextInBox("BOOL",40,20));
         return;
     }
 
@@ -1539,7 +1605,7 @@ class VoidNode extends TypeNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        tree.addChild(parent,new TextInBox("VOID",30,20));
+        tree.addChild(parent,new TextInBox("VOID",40,20));
         return;
     }
 
@@ -1616,7 +1682,7 @@ class AssignStmtNode extends StmtNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox n = new TextInBox("assignExp",60,20);
+        TextInBox n = new TextInBox("aExp",40,20);
         tree.addChild(parent,n);
         myAssign.buildTree(tree,n);
         return;
@@ -1668,11 +1734,16 @@ class PostIncStmtNode extends StmtNode {
         TextInBox n = new TextInBox("loc",30,20);
         
         tree.addChild(parent,n);
-        tree.addChild(parent,new TextInBox("++",30,20));
-        tree.addChild(parent,new TextInBox(";",20,20));
+        tree.addChild(parent,new TextInBox("++",20,20));
+        tree.addChild(parent,new TextInBox(";",10,20));
 
-        myExp.buildTree(tree,n);
-
+        if(myExp instanceof IdNode) {
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n,nID);
+            myExp.buildTree(tree,nID);
+        } else {
+            myExp.buildTree(tree,n);
+        }
 
         return;
     }
@@ -1732,10 +1803,16 @@ class PostDecStmtNode extends StmtNode {
         TextInBox n = new TextInBox("loc",30,20);
         
         tree.addChild(parent,n);
-        tree.addChild(parent,new TextInBox("--",30,20));
-        tree.addChild(parent,new TextInBox(";",20,20));
+        tree.addChild(parent,new TextInBox("--",20,20));
+        tree.addChild(parent,new TextInBox(";",10,20));
 
-        myExp.buildTree(tree,n);
+        if(myExp instanceof IdNode) {
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n,nID);
+            myExp.buildTree(tree,nID);
+        } else {
+            myExp.buildTree(tree,n);
+        }
 
 
         return;
@@ -1796,12 +1873,19 @@ class ReadStmtNode extends StmtNode {
         TextInBox nLoc = new TextInBox("loc",30,20);
 
         tree.addChild(parent,new TextInBox("CIN",30,20));
-        tree.addChild(parent,new TextInBox(">>",30,20));
+        tree.addChild(parent,new TextInBox(">>",20,20));
         tree.addChild(parent,nLoc);
 
-        tree.addChild(parent,new TextInBox(";",20,20));
+        tree.addChild(parent,new TextInBox(";",10,20));
 
-        myExp.buildTree(tree,nLoc);
+        if(myExp instanceof IdNode) {
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(nLoc,nID);
+            myExp.buildTree(tree,nID);
+        } else {
+            myExp.buildTree(tree,nLoc);
+        }
+
         return;
     }
 
@@ -1867,15 +1951,41 @@ class WriteStmtNode extends StmtNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nExp = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
 
-        tree.addChild(parent,new TextInBox("COUT",30,20));
-        tree.addChild(parent,new TextInBox("<<",30,20));
-        tree.addChild(parent,nExp);
+        tree.addChild(parent,new TextInBox("COUT",40,20));
+        tree.addChild(parent,new TextInBox("<<",20,20));
+        tree.addChild(parent,n1);
 
-        tree.addChild(parent,new TextInBox(";",20,20));
+        tree.addChild(parent,new TextInBox(";",10,20));
 
-        myExp.buildTree(tree,nExp);
+        if(myExp instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp.buildTree(tree,nL);
+        } else if (myExp instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp.buildTree(tree,nA);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
         return;
     }
     
@@ -1952,13 +2062,13 @@ class IfStmtNode extends StmtNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nExp = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
         TextInBox nVlist = new TextInBox("vDecList",60,20);
         TextInBox nSlist = new TextInBox("stmtList",60,20);
 
         tree.addChild(parent,new TextInBox("IF",30,20));
         tree.addChild(parent,new TextInBox("(",30,20));
-        tree.addChild(parent,nExp);
+        tree.addChild(parent,n1);
 
         tree.addChild(parent,new TextInBox(")",20,20));
         tree.addChild(parent,new TextInBox("{",30,20));
@@ -1967,8 +2077,35 @@ class IfStmtNode extends StmtNode {
 
         tree.addChild(parent,new TextInBox("}",30,20));
 
-        myExp.buildTree(tree,nExp);
-        myDeclList.buildTree(tree,nVlist);
+        if(myExp instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp.buildTree(tree,nL);
+        } else if (myExp instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp.buildTree(tree,nA);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
+
+        myDeclList.buildTree(tree,nVlist,2);
         myStmtList.buildTree(tree,nSlist);
         return;
     }
@@ -2076,7 +2213,7 @@ class IfElseStmtNode extends StmtNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nExp = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
         TextInBox nVlist = new TextInBox("vDecList",60,20);
         TextInBox nSlist = new TextInBox("stmtList",60,20);
         TextInBox nVlist2 = new TextInBox("vDecList",60,20);
@@ -2084,7 +2221,7 @@ class IfElseStmtNode extends StmtNode {
 
         tree.addChild(parent,new TextInBox("IF",30,20));
         tree.addChild(parent,new TextInBox("(",30,20));
-        tree.addChild(parent,nExp);
+        tree.addChild(parent,n1);
 
         tree.addChild(parent,new TextInBox(")",20,20));
         tree.addChild(parent,new TextInBox("{",30,20));
@@ -2100,10 +2237,37 @@ class IfElseStmtNode extends StmtNode {
         tree.addChild(parent,new TextInBox("}",30,20));
 
 
-        myExp.buildTree(tree,nExp);
-        myThenDeclList.buildTree(tree,nVlist);
+        if(myExp instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp.buildTree(tree,nL);
+        } else if (myExp instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp.buildTree(tree,nA);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
+
+        myThenDeclList.buildTree(tree,nVlist,2);
         myThenStmtList.buildTree(tree,nSlist);
-        myElseDeclList.buildTree(tree,nVlist2);
+        myElseDeclList.buildTree(tree,nVlist2,2);
         myElseStmtList.buildTree(tree,nSlist2);
         return;
     }
@@ -2242,13 +2406,13 @@ class WhileStmtNode extends StmtNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nExp = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
         TextInBox nVlist = new TextInBox("vDecList",60,20);
         TextInBox nSlist = new TextInBox("stmtList",60,20);
 
         tree.addChild(parent,new TextInBox("WHILE",30,20));
         tree.addChild(parent,new TextInBox("(",30,20));
-        tree.addChild(parent,nExp);
+        tree.addChild(parent,n1);
 
         tree.addChild(parent,new TextInBox(")",20,20));
         tree.addChild(parent,new TextInBox("{",30,20));
@@ -2257,8 +2421,35 @@ class WhileStmtNode extends StmtNode {
 
         tree.addChild(parent,new TextInBox("}",30,20));
 
-        myExp.buildTree(tree,nExp);
-        myDeclList.buildTree(tree,nVlist);
+        if(myExp instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp.buildTree(tree,nL);
+        } else if (myExp instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp.buildTree(tree,nA);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
+
+        myDeclList.buildTree(tree,nVlist,2);
         myStmtList.buildTree(tree,nSlist);
         return;
    
@@ -2363,13 +2554,13 @@ class RepeatStmtNode extends StmtNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nExp = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
         TextInBox nVlist = new TextInBox("vDecList",60,20);
         TextInBox nSlist = new TextInBox("stmtList",60,20);
 
         tree.addChild(parent,new TextInBox("REPEAT",30,20));
         tree.addChild(parent,new TextInBox("(",30,20));
-        tree.addChild(parent,nExp);
+        tree.addChild(parent,n1);
 
         tree.addChild(parent,new TextInBox(")",20,20));
         tree.addChild(parent,new TextInBox("{",30,20));
@@ -2378,8 +2569,35 @@ class RepeatStmtNode extends StmtNode {
 
         tree.addChild(parent,new TextInBox("}",30,20));
 
-        myExp.buildTree(tree,nExp);
-        myDeclList.buildTree(tree,nVlist);
+        if(myExp instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp.buildTree(tree,nL);
+        } else if (myExp instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp.buildTree(tree,nA);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
+
+        myDeclList.buildTree(tree,nVlist,2);
         myStmtList.buildTree(tree,nSlist);
         return;
     }
@@ -2468,7 +2686,7 @@ class CallStmtNode extends StmtNode {
         TextInBox nCall = new TextInBox("fncall",50,20);
 
         tree.addChild(parent,nCall);
-        tree.addChild(parent,new TextInBox(";",30,20));
+        tree.addChild(parent,new TextInBox(";",10,20));
 
         myCall.buildTree(tree,nCall);
 
@@ -2518,22 +2736,47 @@ class ReturnStmtNode extends StmtNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nExp = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
         
 
         tree.addChild(parent,new TextInBox("RETURN",60,20));
         
         if(myExp != null) {
-            tree.addChild(parent,nExp);
+            tree.addChild(parent,n1);
+            if(myExp instanceof IdNode) {
+                TextInBox nT = new TextInBox("term",35,20);
+                TextInBox nL = new TextInBox("loc",30,20);
+                TextInBox nID = new TextInBox("id",20,20);
+                tree.addChild(n1,nT);
+                tree.addChild(nT,nL);
+                tree.addChild(nL,nID);
+                myExp.buildTree(tree,nID);
+            } else if(myExp instanceof CallExpNode) {
+                TextInBox nT = new TextInBox("term",35,20);
+                TextInBox nC = new TextInBox("fncall",50,20);
+                tree.addChild(n1,nT);
+                tree.addChild(nT,nC);
+                myExp.buildTree(tree,nC);
+            } else if(myExp instanceof DotAccessExpNode) {
+                TextInBox nT = new TextInBox("term",35,20);
+                TextInBox nL = new TextInBox("loc",30,20);
+                tree.addChild(n1,nT);
+                tree.addChild(nT,nL);
+                myExp.buildTree(tree,nL);
+            } else if (myExp instanceof AssignNode) {
+                TextInBox nA = new TextInBox("aExp",30,20);
+                tree.addChild(n1,nA);
+                myExp.buildTree(tree,nA);
+            } else {
+                myExp.buildTree(tree,n1);
+            }
         }
 
         
 
-        tree.addChild(parent,new TextInBox(";",30,20));
+        tree.addChild(parent,new TextInBox(";",10,20));
 
-        if(myExp != null) {
-            myExp.buildTree(tree,nExp);
-        }
+        
         
         
         return;
@@ -2627,7 +2870,9 @@ class IntLitNode extends ExpNode {
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         String val = myIntVal+"";
-        tree.addChild(parent,new TextInBox(val,20,20));
+        TextInBox n = new TextInBox("term",35,20);
+        tree.addChild(parent,n);
+        tree.addChild(n,new TextInBox(val,20,20));
         return;
     }
     
@@ -2683,8 +2928,10 @@ class StringLitNode extends ExpNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
+        TextInBox n = new TextInBox("term",35,20);
+        tree.addChild(parent,n);
         String val = "\""+myStrVal+"\"";
-        tree.addChild(parent,new TextInBox(val,20,20));
+        tree.addChild(n,new TextInBox(val,60,20));
         return;
     }
 
@@ -2745,8 +2992,9 @@ class TrueNode extends ExpNode {
     }
     
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        
-        tree.addChild(parent,new TextInBox("TRUE",20,20));
+        TextInBox n = new TextInBox("term",35,20);
+        tree.addChild(parent,n);
+        tree.addChild(n,new TextInBox("TRUE",20,20));
         return;
     }
 
@@ -2799,7 +3047,9 @@ class FalseNode extends ExpNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        tree.addChild(parent,new TextInBox("FALSE",20,20));
+        TextInBox n = new TextInBox("term",35,20);
+        tree.addChild(parent,n);
+        tree.addChild(n,new TextInBox("FALSE",20,20));
         return;
     }
 
@@ -3010,7 +3260,19 @@ class DotAccessExpNode extends ExpNode {
     }
     
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-
+        TextInBox nLoc = new TextInBox("loc",30,20);
+        TextInBox nID = new TextInBox("id",20,20);
+        tree.addChild(parent,nLoc);
+        tree.addChild(parent,new TextInBox(".",10,20));
+        tree.addChild(parent,nID);
+        if(myLoc instanceof IdNode) {
+            TextInBox nID2 = new TextInBox("id",20,20);
+            tree.addChild(nLoc,nID2);
+            myLoc.buildTree(tree,nID2);
+        } else {
+            myLoc.buildTree(tree,nLoc);
+        }
+        myId.buildTree(tree,nID);
         return;
     }
 
@@ -3272,14 +3534,47 @@ class AssignNode extends ExpNode {
     
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox nLoc= new TextInBox("loc",30,20);
-        TextInBox nExp = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
 
         tree.addChild(parent,nLoc);
         tree.addChild(parent,new TextInBox("=",20,20));
-        tree.addChild(parent,nExp);
+        tree.addChild(parent,n1);
 
-        myLhs.buildTree(tree,nLoc);
-        myExp.buildTree(tree,nExp);
+        if(myLhs instanceof IdNode) {
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(nLoc,nID);
+            myLhs.buildTree(tree,nID);
+        } else {
+            myLhs.buildTree(tree,nLoc);
+        }
+        
+        if(myExp instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp.buildTree(tree,nL);
+        } else if (myExp instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp.buildTree(tree,nA);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
 
 
         return;
@@ -3641,13 +3936,45 @@ class UnaryMinusNode extends UnaryExpNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox n = new TextInBox("term",30,20);
+        if(!(myExp instanceof IntLitNode || myExp instanceof StringLitNode || myExp instanceof TrueNode || myExp instanceof FalseNode || myExp instanceof DotAccessExpNode || myExp instanceof CallExpNode )) {
+            TextInBox n = new TextInBox("term",30,20);
+            TextInBox n2 = new TextInBox("exp",30,20);
+
+            tree.addChild(parent,new TextInBox("-",20,20));
+            tree.addChild(parent,n);
+            tree.addChild(n,new TextInBox("(",15,20));
+            tree.addChild(n,n2);
+            tree.addChild(n,new TextInBox(")",15,20));
+
+            myExp.buildTree(tree,n2);
+
+        
+        }
+        else {
+        TextInBox n1 = new TextInBox("term",30,20);
 
         tree.addChild(parent,new TextInBox("-",20,20));
-        tree.addChild(parent,n);
+        tree.addChild(parent,n1);
 
-        myExp.buildTree(tree,n);
+        if(myExp instanceof IdNode) {
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nL);
+            myExp.buildTree(tree,nL);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
 
+        }
         return;
     }
     
@@ -3706,12 +4033,39 @@ class NotNode extends UnaryExpNode {
     }
     
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox n = new TextInBox("exp",30,20);
+        TextInBox n1 = new TextInBox("exp",30,20);
 
         tree.addChild(parent,new TextInBox("!",20,20));
-        tree.addChild(parent,n);
+        tree.addChild(parent,n1);
 
-        myExp.buildTree(tree,n);
+        if(myExp instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp.buildTree(tree,nID);
+        } else if(myExp instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp.buildTree(tree,nC);
+        } else if(myExp instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp.buildTree(tree,nL);
+        } else if (myExp instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp.buildTree(tree,nA);
+        } else {
+            myExp.buildTree(tree,n1);
+        }
+
         return;
     }
 
@@ -4024,8 +4378,64 @@ class PlusNode extends ArithmeticExpNode {
         tree.addChild(parent,new TextInBox("+",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
+
+        
+        
 
         return;
     }
@@ -4062,8 +4472,61 @@ class MinusNode extends ArithmeticExpNode {
         tree.addChild(parent,new TextInBox("-",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4100,8 +4563,61 @@ class TimesNode extends ArithmeticExpNode {
         tree.addChild(parent,new TextInBox("*",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4139,8 +4655,61 @@ class DivideNode extends ArithmeticExpNode {
         tree.addChild(parent,new TextInBox("/",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4177,8 +4746,61 @@ class AndNode extends LogicalExpNode {
         tree.addChild(parent,new TextInBox("&&",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4223,8 +4845,61 @@ class OrNode extends LogicalExpNode {
         tree.addChild(parent,new TextInBox("||",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4267,8 +4942,61 @@ class EqualsNode extends EqualityExpNode {
         tree.addChild(parent,new TextInBox("==",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4338,8 +5066,61 @@ class NotEqualsNode extends EqualityExpNode {
         tree.addChild(parent,new TextInBox("!=",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4409,8 +5190,61 @@ class LessNode extends RelationalExpNode {
         tree.addChild(parent,new TextInBox("<",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4447,8 +5281,61 @@ class GreaterNode extends RelationalExpNode {
         tree.addChild(parent,new TextInBox(">",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4484,8 +5371,61 @@ class LessEqNode extends RelationalExpNode {
         tree.addChild(parent,new TextInBox("<=",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        }  else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
@@ -4521,8 +5461,61 @@ class GreaterEqNode extends RelationalExpNode {
         tree.addChild(parent,new TextInBox(">=",20,20));
         tree.addChild(parent,n2);
 
-        myExp1.buildTree(tree,n1);
-        myExp2.buildTree(tree,n2);
+        if(myExp1 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp1.buildTree(tree,nID);
+        } else if(myExp1 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nC);
+            myExp1.buildTree(tree,nC);
+        } else if(myExp1 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n1,nT);
+            tree.addChild(nT,nL);
+            myExp1.buildTree(tree,nL);
+        } else if (myExp1 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n1,nA);
+            myExp1.buildTree(tree,nA);
+        } else {
+            myExp1.buildTree(tree,n1);
+        }
+
+        if(myExp2 instanceof IdNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            TextInBox nID = new TextInBox("id",20,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            tree.addChild(nL,nID);
+            myExp2.buildTree(tree,nID);
+        } else if(myExp2 instanceof CallExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nC = new TextInBox("fncall",50,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nC);
+            myExp2.buildTree(tree,nC);
+        } else if(myExp2 instanceof DotAccessExpNode) {
+            TextInBox nT = new TextInBox("term",35,20);
+            TextInBox nL = new TextInBox("loc",30,20);
+            tree.addChild(n2,nT);
+            tree.addChild(nT,nL);
+            myExp2.buildTree(tree,nL);
+        } else if (myExp2 instanceof AssignNode) {
+            TextInBox nA = new TextInBox("aExp",30,20);
+            tree.addChild(n2,nA);
+            myExp2.buildTree(tree,nA);
+        } else {
+            myExp2.buildTree(tree,n2);
+        }
 
         return;
     }
