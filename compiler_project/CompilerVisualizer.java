@@ -559,7 +559,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
             panel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel5Layout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addComponent(treeTextHolder, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(treeTextHolder, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(30, 30, 30)
                 .addComponent(treeHolder, javax.swing.GroupLayout.DEFAULT_SIZE, 438, Short.MAX_VALUE)
                 .addGap(30, 30, 30))
