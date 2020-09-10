@@ -139,7 +139,7 @@ class ProgramNode extends ASTnode {
     }
     
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox n1 = new TextInBox("declList", 50, 20);
+        TextInBox n1 = new TextInBox("dList", 40, 20);
         
         tree.addChild(parent,n1);
 
@@ -197,7 +197,7 @@ class DeclListNode extends ASTnode {
         if(nameCode == 1) {
             for (DeclNode node: myDecls) {
                 TextInBox n1 = new TextInBox("decl",30,20);
-                TextInBox n2 = new TextInBox("declList",50,20);
+                TextInBox n2 = new TextInBox("dList",40,20);
 
                 tree.addChild(parent,n1);
                 tree.addChild(parent,n2);
@@ -229,7 +229,7 @@ class DeclListNode extends ASTnode {
             
             
             for(int i=0; i<myDecls.size();i++) {
-                TextInBox n2 = new TextInBox("strBody",50,20);
+                TextInBox n2 = new TextInBox("sBody",40,20);
                 if(i != myDecls.size()-1) {
                     tree.addChild(parent,n2);
                 }
@@ -773,7 +773,7 @@ class VarDeclNode extends DeclNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox n1 = new TextInBox("varDecl",50,20);
+        TextInBox n1 = new TextInBox("vDecl",40,20);
         tree.addChild(parent,n1);
         TextInBox n3 = new TextInBox("id",20,20);
 
@@ -1404,9 +1404,9 @@ class StructDeclNode extends DeclNode {
     }
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
-        TextInBox nStruct = new TextInBox("strDecl",50,20);
+        TextInBox nStruct = new TextInBox("sDecl",40,20);
         TextInBox nID = new TextInBox("id",20,20);
-        TextInBox nBody = new TextInBox("strBody",50,20);
+        TextInBox nBody = new TextInBox("sBody",40,20);
         
 
         tree.addChild(parent,nStruct);
@@ -2063,19 +2063,19 @@ class IfStmtNode extends StmtNode {
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox n1 = new TextInBox("exp",30,20);
-        TextInBox nVlist = new TextInBox("vDecList",60,20);
-        TextInBox nSlist = new TextInBox("stmtList",60,20);
+        TextInBox nVlist = new TextInBox("vList",40,20);
+        TextInBox nSlist = new TextInBox("sList",40,20);
 
         tree.addChild(parent,new TextInBox("IF",30,20));
-        tree.addChild(parent,new TextInBox("(",30,20));
+        tree.addChild(parent,new TextInBox("(",10,20));
         tree.addChild(parent,n1);
 
-        tree.addChild(parent,new TextInBox(")",20,20));
-        tree.addChild(parent,new TextInBox("{",30,20));
+        tree.addChild(parent,new TextInBox(")",10,20));
+        tree.addChild(parent,new TextInBox("{",10,20));
         tree.addChild(parent,nVlist);
         tree.addChild(parent,nSlist);
 
-        tree.addChild(parent,new TextInBox("}",30,20));
+        tree.addChild(parent,new TextInBox("}",10,20));
 
         if(myExp instanceof IdNode) {
             TextInBox nT = new TextInBox("term",35,20);
@@ -2214,27 +2214,27 @@ class IfElseStmtNode extends StmtNode {
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox n1 = new TextInBox("exp",30,20);
-        TextInBox nVlist = new TextInBox("vDecList",60,20);
-        TextInBox nSlist = new TextInBox("stmtList",60,20);
-        TextInBox nVlist2 = new TextInBox("vDecList",60,20);
-        TextInBox nSlist2 = new TextInBox("stmtList",60,20);
+        TextInBox nVlist = new TextInBox("vList",40,20);
+        TextInBox nSlist = new TextInBox("sList",40,20);
+        TextInBox nVlist2 = new TextInBox("vList",40,20);
+        TextInBox nSlist2 = new TextInBox("sList",40,20);
 
         tree.addChild(parent,new TextInBox("IF",30,20));
-        tree.addChild(parent,new TextInBox("(",30,20));
+        tree.addChild(parent,new TextInBox("(",10,20));
         tree.addChild(parent,n1);
 
-        tree.addChild(parent,new TextInBox(")",20,20));
-        tree.addChild(parent,new TextInBox("{",30,20));
+        tree.addChild(parent,new TextInBox(")",10,20));
+        tree.addChild(parent,new TextInBox("{",10,20));
         tree.addChild(parent,nVlist);
         tree.addChild(parent,nSlist);
 
-        tree.addChild(parent,new TextInBox("}",30,20));
-        tree.addChild(parent,new TextInBox("ELSE",30,20));
-        tree.addChild(parent,new TextInBox("{",30,20));
+        tree.addChild(parent,new TextInBox("}",10,20));
+        tree.addChild(parent,new TextInBox("ELSE",40,20));
+        tree.addChild(parent,new TextInBox("{",10,20));
         tree.addChild(parent,nVlist2);
         tree.addChild(parent,nSlist2);
 
-        tree.addChild(parent,new TextInBox("}",30,20));
+        tree.addChild(parent,new TextInBox("}",10,20));
 
 
         if(myExp instanceof IdNode) {
@@ -2407,19 +2407,19 @@ class WhileStmtNode extends StmtNode {
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox n1 = new TextInBox("exp",30,20);
-        TextInBox nVlist = new TextInBox("vDecList",60,20);
-        TextInBox nSlist = new TextInBox("stmtList",60,20);
+        TextInBox nVlist = new TextInBox("vList",40,20);
+        TextInBox nSlist = new TextInBox("sList",40,20);
 
-        tree.addChild(parent,new TextInBox("WHILE",30,20));
-        tree.addChild(parent,new TextInBox("(",30,20));
+        tree.addChild(parent,new TextInBox("WHILE",55,20));
+        tree.addChild(parent,new TextInBox("(",10,20));
         tree.addChild(parent,n1);
 
-        tree.addChild(parent,new TextInBox(")",20,20));
-        tree.addChild(parent,new TextInBox("{",30,20));
+        tree.addChild(parent,new TextInBox(")",10,20));
+        tree.addChild(parent,new TextInBox("{",10,20));
         tree.addChild(parent,nVlist);
         tree.addChild(parent,nSlist);
 
-        tree.addChild(parent,new TextInBox("}",30,20));
+        tree.addChild(parent,new TextInBox("}",10,20));
 
         if(myExp instanceof IdNode) {
             TextInBox nT = new TextInBox("term",35,20);
@@ -2555,19 +2555,19 @@ class RepeatStmtNode extends StmtNode {
 
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox n1 = new TextInBox("exp",30,20);
-        TextInBox nVlist = new TextInBox("vDecList",60,20);
-        TextInBox nSlist = new TextInBox("stmtList",60,20);
+        TextInBox nVlist = new TextInBox("vList",40,20);
+        TextInBox nSlist = new TextInBox("sList",40,20);
 
-        tree.addChild(parent,new TextInBox("REPEAT",30,20));
-        tree.addChild(parent,new TextInBox("(",30,20));
+        tree.addChild(parent,new TextInBox("REPEAT",65,20));
+        tree.addChild(parent,new TextInBox("(",10,20));
         tree.addChild(parent,n1);
 
-        tree.addChild(parent,new TextInBox(")",20,20));
-        tree.addChild(parent,new TextInBox("{",30,20));
+        tree.addChild(parent,new TextInBox(")",10,20));
+        tree.addChild(parent,new TextInBox("{",10,20));
         tree.addChild(parent,nVlist);
         tree.addChild(parent,nSlist);
 
-        tree.addChild(parent,new TextInBox("}",30,20));
+        tree.addChild(parent,new TextInBox("}",10,20));
 
         if(myExp instanceof IdNode) {
             TextInBox nT = new TextInBox("term",35,20);
@@ -2994,7 +2994,7 @@ class TrueNode extends ExpNode {
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox n = new TextInBox("term",35,20);
         tree.addChild(parent,n);
-        tree.addChild(n,new TextInBox("TRUE",20,20));
+        tree.addChild(n,new TextInBox("TRUE",50,20));
         return;
     }
 
@@ -3049,7 +3049,7 @@ class FalseNode extends ExpNode {
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox n = new TextInBox("term",35,20);
         tree.addChild(parent,n);
-        tree.addChild(n,new TextInBox("FALSE",20,20));
+        tree.addChild(n,new TextInBox("FALSE",50,20));
         return;
     }
 
@@ -3712,6 +3712,7 @@ class CallExpNode extends ExpNode {
     public void buildTree(DefaultTreeForTreeLayout<TextInBox> tree, TextInBox parent) {
         TextInBox nID = new TextInBox("id",20,20);
         tree.addChild(parent,nID);
+        myId.buildTree(tree,nID);
         tree.addChild(parent,new TextInBox("(",15,20));
         if(myExpList != null) {
             myExpList.buildTree(tree,parent);

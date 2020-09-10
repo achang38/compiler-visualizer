@@ -120,6 +120,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         errorTextArea.setText("The compiler encountered issues at this step. Please go back and fix your program.");
         errorTextPane.setViewportView(errorTextArea);
 
+        /**
         errorTable.setFont(new java.awt.Font("Nirmala UI Semilight", 0, 14)); // NOI18N
         errorTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -148,6 +149,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
             }
         });
         errorTablePane.setViewportView(errorTable);
+        */
 
         javax.swing.GroupLayout errorDialogLayout = new javax.swing.GroupLayout(errorDialog.getContentPane());
         errorDialog.getContentPane().setLayout(errorDialogLayout);
@@ -313,7 +315,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         instructionText.setFont(new java.awt.Font("Nirmala UI Semilight", 0, 18)); // NOI18N
         instructionText.setLineWrap(true);
         instructionText.setRows(5);
-        instructionText.setText(" This application shows how Wumbo, a programming language that is a subset of C++ is compiled.\n\n Instructions:\n 1. The Tokens button below shows the regular expressions used for parsing the program into tokens. \n 2. The grammar button shows the context free grammar that Wumbo uses for its syntax. \n 3. Wumbo allows for declarations: variables of int or bool, structs, struct variables, and functions. \n 4. Declaration names must be unique within their scope. There is the global scope and a new scope\n for each function and if/while/repeat loops. \n 5. Struct and function declarations may only occur in the global scope. \n 6. The global scope can only have declarations and no statements. Within other scopes, all variable\n declaration must occur before any statements. All variables must be declared before they may be used. \n 7. If and while clauses must hold an boolean expression, repeat clauses must hold an integer expression.\n 8. Arithmetic and relational operators must have only integers as operands. Logical operators must\n have only booleans as operands.\n 9. Statements include if/while/repeat loops, assignments, function calls, read, write, and increment/decrement.\n 10. Wumbo programs must have a function called \"main\", its parameters and return types are flexible.");
+        instructionText.setText(" This application shows how Wumbo, a programming language that is a subset of C++ is compiled.\n\n Instructions:\n 1. The Tokens button below shows the regular expressions used for parsing the program into tokens. \n 2. The grammar button shows the context free grammar that Wumbo uses for its syntax. \n 3. Wumbo allows for declarations: variables of int or bool, structs, struct variables, and functions. \n 4. Declaration names must be unique within their scope. There is the global scope and a new scope\n for each function and if/while/repeat loops. \n 5. Struct and function declarations may only occur in the global scope. \n 6. The global scope can only have declarations and no statements. Within other scopes, all variable\n declaration must occur before any statements. All variables must be declared before they may be used. \n 7. If and while clauses must hold an boolean expression, repeat clauses must hold an integer expression.\n 8. Arithmetic and relational operators must have only integers as operands. Logical operators must\n have only booleans as operands.\n 9. Statements include if/while/repeat loops, assignments, function calls, read, write, and increment/decrement.\n 10. Wumbo programs must have a function called \"main\", its parameters and return types are flexible.\n 11. If there is a mistake in your program, this compiler will notify you at the appropriate section.");
         instructionText.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 1, true));
         instructionsHolder.setViewportView(instructionText);
 
@@ -347,7 +349,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(authorText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(45, 45, 45)
-                .addComponent(instructionsHolder, javax.swing.GroupLayout.PREFERRED_SIZE, 435, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(instructionsHolder, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -427,7 +429,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         jPanel2.add(panel2, "card4");
 
         panel3.setBackground(new java.awt.Color(173, 216, 230));
-
+        /** 
         tokenTable.setFont(new java.awt.Font("Nirmala UI Semilight", 0, 14)); // NOI18N
         tokenTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -459,6 +461,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         tokenTable.setShowHorizontalLines(true);
         tokenTable.setShowVerticalLines(true);
         tokenHolder.setViewportView(tokenTable);
+        */
 
         tokenText.setEditable(false);
         tokenText.setBackground(new java.awt.Color(173, 216, 230));
@@ -598,7 +601,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         jPanel2.add(panel6, "card6");
 
         panel7.setBackground(new java.awt.Color(173, 216, 230));
-
+        /** 
         symbolTable.setFont(new java.awt.Font("Nirmala UI Semilight", 0, 14)); // NOI18N
         symbolTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -629,6 +632,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         symbolTable.setShowGrid(true);
         symbolTable.setShowVerticalLines(false);
         symbolHolder.setViewportView(symbolTable);
+        **/
 
         symbolTextHolder.setBorder(null);
         symbolTextHolder.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
@@ -795,7 +799,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         
         
-        /**
+        
         jPanel2.removeAll();
         
         curPanel = 0;
@@ -803,44 +807,84 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         jPanel2.add(panelList[0]);
         jPanel2.repaint();
         jPanel2.revalidate();
-        * */
+        ErrMsg.clearErrors();
+        
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         // TODO add your handling code here:
         if(curPanel > 0) {
             curPanel--;
+            jPanel2.removeAll();
+            jPanel2.add(panelList[curPanel]);
+            jPanel2.repaint();
+            jPanel2.revalidate();
         }
+
         
-        jPanel2.removeAll();
-        jPanel2.add(panelList[curPanel]);
-        jPanel2.repaint();
-        jPanel2.revalidate();
+        ErrMsg.clearErrors();
+        
+        
+    
     }//GEN-LAST:event_backButtonActionPerformed
 
     private void nextButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextButtonActionPerformed
-        if(hasError) {
+        if(curPanel == 2) {
+            buildTokens();
+        } else if(curPanel == 4) {
+            buildTree();
+        } else if(curPanel == 6) {
+            buildSymbols();
+        } else if(curPanel == 8) {
+            buildCode();
+        }
+
+
+        if(ErrMsg.getErr()) {
+            ArrayList<String> errors = ErrMsg.getList();
+            String[][] eData = new String[errors.size()][1];
+            for(int i = 0; i<errors.size();i++) {
+                eData[i][0] = errors.get(i);
+            }
+
+            errorTable.setFont(new java.awt.Font("Nirmala UI Semilight", 0, 14)); // NOI18N
+            errorTable.setModel(new javax.swing.table.DefaultTableModel(
+                eData,
+                new String [] {
+                    "Errors"
+                }
+            ) {
+                Class[] types = new Class [] {
+                    java.lang.String.class
+                };
+                boolean[] canEdit = new boolean [] {
+                    false
+                };
+    
+                public Class getColumnClass(int columnIndex) {
+                    return types [columnIndex];
+                }
+    
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return canEdit [columnIndex];
+                }
+            });
+            errorTablePane.setViewportView(errorTable);
+
             errorDialog.pack();
             errorDialog.setBounds(X-errorDialog.getWidth()/2,Y-errorDialog.getHeight()/2,errorDialog.getWidth(),errorDialog.getHeight());
             errorDialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
             errorDialog.setDefaultCloseOperation(javax.swing.JDialog.DISPOSE_ON_CLOSE);
             errorDialog.setVisible(true);
-        } else {
-            if(curPanel == 2) {
-                buildTokens();
-            } else if(curPanel == 4) {
-                buildTree();
-            }
+            
+        } else if(curPanel<10) {
+            curPanel++;
+            jPanel2.removeAll();
+            jPanel2.add(panelList[curPanel]);
+            jPanel2.repaint();
+            jPanel2.revalidate();
         }
         
-        // TODO add your handling code here:
-        if(curPanel<10) {
-            curPanel++;
-        }
-        jPanel2.removeAll();
-        jPanel2.add(panelList[curPanel]);
-        jPanel2.repaint();
-        jPanel2.revalidate();
     }//GEN-LAST:event_nextButtonActionPerformed
 
     private void tokenButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tokenButtonActionPerformed
@@ -898,9 +942,58 @@ public class CompilerVisualizer extends javax.swing.JFrame {
             sr = new StringReader(text);
             scanner = new Yylex(sr);
             Symbol token = scanner.next_token();
+            ArrayList<String> tokens = new ArrayList<String>();
+            CharNum.num = 1;
+            while (token.sym != sym.EOF) {
+                tokens.add(sym.terminalNames[token.sym]+"("+((TokenVal)token.value).linenum+","+((TokenVal)token.value).charnum+")");
+                token = scanner.next_token();
+            }
+
+            double rows = Math.ceil((float)tokens.size()/(float)8);
+            int numRows = (int)rows;
+
+            String[][] data = new String[numRows][8];
+
+            for(int i = 0;i<numRows;i++) {
+                for(int j = 0;j<8;j++) {
+                    if(i*8+j < tokens.size()) {
+                        data[i][j] = tokens.get(i*8+j);
+                    }
+                }
+            }
+            System.out.println(tokens.get(0));
+            System.out.println(data[0][0]);
+
+            tokenTable.setFont(new java.awt.Font("Nirmala UI Semilight", 0, 14)); // NOI18N
+            tokenTable.setModel(new javax.swing.table.DefaultTableModel(
+                data,
+            new String [] {
+                "Title x", "Title 2", "Title 3", "Title 4", "null", "null", "null", "null"
+            }
+            )   {
+                Class[] types = new Class [] {
+                    java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                };
+                boolean[] canEdit = new boolean [] {
+                    false, false, false, false, false, false, false, false
+                };
+
+                public Class getColumnClass(int columnIndex) {
+                    return types [columnIndex];
+                }
+
+                public boolean isCellEditable(int rowIndex, int columnIndex) {
+                    return canEdit [columnIndex];
+            }
+        });
+        tokenTable.setTableHeader(null);
+        tokenTable.setShowGrid(true);
+        tokenTable.setShowHorizontalLines(true);
+        tokenTable.setShowVerticalLines(true);
+        tokenHolder.setViewportView(tokenTable);
+
         } catch (Exception e) {
-            System.err.println("Unexpected error in buildTokens method");
-            System.exit(-1);
+            
         }
     }
 
@@ -945,6 +1038,7 @@ public class CompilerVisualizer extends javax.swing.JFrame {
         if(ErrMsg.getErr()) {
             return;
         }
+        astRoot.nameAnalysis();
         astRoot.typeCheck();
         if(ErrMsg.getErr()) {
             return;
@@ -999,11 +1093,47 @@ public class CompilerVisualizer extends javax.swing.JFrame {
             data[i] = tData.get(i);
         }
 
-        JTable jT = new JTable(data,columnNames);
+        //JTable jT = new JTable(data,columnNames);
+
+        symbolTable.setFont(new java.awt.Font("Nirmala UI Semilight", 0, 14)); // NOI18N
+        symbolTable.setModel(new javax.swing.table.DefaultTableModel(
+            data,
+            columnNames
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        symbolTable.setShowGrid(true);
+        symbolTable.setShowVerticalLines(false);
+        symbolHolder.setViewportView(symbolTable);
     }
 
     public void buildCode() {
         
+        try {
+            PrintWriter outFile = new PrintWriter("newcode.out");
+            Codegen.p = new PrintWriter(outFile);
+            astRoot.codeGen(Codegen.p);
+            outFile.close();
+            String fileString = new String(Files.readAllBytes(Paths.get("newcode.out")));
+            assemblyCode.setText(fileString);
+        } catch (FileNotFoundException fe) {
+            System.err.println("Unexpected error in buildCode");
+        } catch (IOException ie) {
+            System.err.println("Unexpected error in buildCode");
+        }
     }
 
     /**
@@ -1115,7 +1245,6 @@ public class CompilerVisualizer extends javax.swing.JFrame {
     static final Dimension SCREEN_DIMENSION = Toolkit.getDefaultToolkit().getScreenSize();
     private int X = SCREEN_DIMENSION.width / 2; //position right in the middle of the screen
     private int Y = SCREEN_DIMENSION.height / 2;
-    private boolean hasError = false;
     private Yylex scanner;
     private parser p;
     private ProgramNode astRoot;

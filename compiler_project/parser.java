@@ -415,7 +415,6 @@ public void syntax_error(Symbol currToken) {
                      ((TokenVal)currToken.value).charnum,
                      "Syntax error");
     }
-    System.exit(-1);
 }
 
 

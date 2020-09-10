@@ -16,7 +16,7 @@ class ErrMsg {
 	 */
 	static void fatal(int lineNum, int charNum, String msg) {
 		err = true;
-		listErrors.add(lineNum + ":" + charNum + " ***ERROR*** " + msg);
+		listErrors.add("LINE:"+lineNum + " CHAR:" + charNum + " ***ERROR*** " + msg);
 		System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + msg);
 	}
 
@@ -27,7 +27,7 @@ class ErrMsg {
 	 * @param msg associated message for warning
 	 */
 	static void warn(int lineNum, int charNum, String msg) {
-		listErrors.add(lineNum + ":" + charNum + " ***WARNING*** " + msg);
+		listErrors.add("LINE:"+lineNum + " CHAR:" + charNum + " ***WARNING*** " + msg);
 		System.err.println(lineNum + ":" + charNum + " ***WARNING*** " + msg);
 	}
 
@@ -44,6 +44,7 @@ class ErrMsg {
 
 	static void clearErrors() {
 		listErrors.clear();
+		err = false;
 	}
 
 }
