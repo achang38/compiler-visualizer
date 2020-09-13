@@ -6,7 +6,6 @@ Installation of Java is required to run this application. Add java to your PATH 
 <br />
 <br />
 If you are on a Linux system, run
-
 ```
 javac -g -cp ./deps:. *.java
 ```
@@ -17,7 +16,6 @@ java -cp ./deps:. CompilerVisualizer
 <br />
 <br />
 Otherwise if you are using Windows replace the colon with a semicolon:
-
 ```
 javac -g -cp ./deps;. *.java
 ```
