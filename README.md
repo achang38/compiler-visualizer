@@ -14,8 +14,8 @@ followed by
 java -cp ./deps:. CompilerVisualizer
 ```
 <br />
-<br />
 Otherwise if you are using Windows replace the colon with a semicolon:
+
 ```
 javac -g -cp ./deps;. *.java
 ```
