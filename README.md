@@ -3,9 +3,10 @@ An application that shows what happens when a program is compiled. I created thi
 
 # Setup
 Installation of Java is required to run this application. Add java to your PATH system variable, then on your shell navigate to the source folder in this repository.
-
-
+<br />
+<br />
 If you are on a Linux system, run
+
 ```
 javac -g -cp ./deps:. *.java
 ```
@@ -13,9 +14,10 @@ followed by
 ```
 java -cp ./deps:. CompilerVisualizer
 ```
-
-
+<br />
+<br />
 Otherwise if you are using Windows replace the colon with a semicolon:
+
 ```
 javac -g -cp ./deps;. *.java
 ```
